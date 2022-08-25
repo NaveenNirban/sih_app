@@ -1,18 +1,40 @@
+from dataclasses import field
 import django.contrib.auth.password_validation as validators
 from rest_framework import serializers
 from admin_portal.forms import HodRegisterForm
-from admin_portal.models import Hod, Parent,Teacher, Student
+from admin_portal.models import Hod, HodManager, HodMaster, Parent,Teacher, Student,Org, OrganizationMaster
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from sih_app.enums import Enum, Role
+
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Org
+        fields = ('id','email','first_name','username','type')
+
+class OrganizationMasterSerializer(serializers.ModelSerializer):
+    orgUser = OrganizationSerializer()
+    class Meta:
+        model = OrganizationMaster
+        fields = ('id',"orgUser")
 
 class HodSerializer(serializers.ModelSerializer):
-    #updatedById = MyUserSerializer()
     class Meta:
         model = Hod
-        fields = ('id','email','first_name','last_name','username','type','date_joined','last_login')
+        fields = ('id','email','first_name')
         #fields = '__all__'
-        #depth = 1
-
+class HodMasterSerializer(serializers.ModelSerializer):
+    #updatedById = MyUserSerializer()
+    #hod = serializers.RelatedField(source="Hod",read_only =True)
+    org  = OrganizationMasterSerializer()
+    hod = HodSerializer()
+    class Meta:
+        model = HodMaster
+        #fields = ('id','email','first_name','last_name','username','type','date_joined','last_login')
+        fields = ('id','org','hod')
+        
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
@@ -38,9 +60,32 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        if user.type == Role.Admin:
+            token['type'] = user.type
+            token['schoolName'] = user.first_name
+            token['schoolImage'] = user.first_name
+        if user.type == Role.HOD:
+            token['type'] = user.type
+            token['hodName'] = user.first_name
+            token['schoolId'] = user.first_name
+            token['email'] = user.email
+            token['phone'] = user.mobile
+        if user.type == Role.Teacher:
+            token['type'] = user.type
+            token['teacherName'] = user.first_name
+            token['empId'] = str(user.id)
+            token['email'] = user.emal
+            token['phone'] = user.mobile
+        if user.type == Role.Student:
+            token['type'] = user.type
+            token['studentName'] = user.first_name
+            token['schoolId'] = str(user.id)
+            token['admissionNo'] = user.emal
+            token['phone'] = user.mobile
+            token['kakshaId'] = str(user.id)
+            token['fatherName'] = user.first_name
 
-        # Add custom claims
-        token['type'] = user.type
+        
         # ...
 
         return token

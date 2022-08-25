@@ -16,27 +16,23 @@ class UserAdmin(BaseUserAdmin):
 
 class OrganizationMasterAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        obj.adminPassword = make_password(obj.adminPassword)
         super().save_model(request, obj, form, change)
 
 class AdminHodMasterAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
 
 class TeachersMasterAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
 
 class ParentsAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        obj.password = make_password(obj.password)
+        # obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
 
 class StudentsMasterAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
 
 # Register your models here.

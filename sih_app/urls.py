@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 import admin_portal.views
-import mobileapp.views
+import mobileapp.views as api
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,TokenVerifyView
@@ -25,12 +25,14 @@ from admin_portal.serializers import MyTokenObtainPairView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('hello/', admin_portal.views.HelloView.as_view(), name='hello'),
-    path('mobile/test/',mobileapp.views.hodLogin),
-    path('register/',mobileapp.views.HodRegisterView.as_view()),
-    path('orgLogin/',mobileapp.views.OrgLoginView.as_view()),
+    # path('hello/', admin_portal.views.HelloView.as_view(), name='hello'),
+    # path('mobile/test/',mobileapp.views.hodLogin),
+    # path('register/',mobileapp.views.HodRegisterView.as_view()),
+    # path('orgLogin/',mobileapp.views.OrgLoginView.as_view()),
     path('api/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('api/hodAdd/',api.AdminHodCreate.as_view(), name="hodadd"),
+    path('demo/',api.demoSerial, name="demo"),
 
 ]

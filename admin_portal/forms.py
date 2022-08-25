@@ -21,7 +21,7 @@ class HodRegisterForm(UserCreationForm):
 
 	class Meta:
 		model = Hod
-		fields = ("username", "email", "password1", "password2")
+		fields = ("username", "email", "mobile", "first_name","password1","password2")
 
 	def save(self, commit=True):
 		user = super(HodRegisterForm, self).save(commit=False)

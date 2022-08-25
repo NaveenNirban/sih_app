@@ -1,11 +1,11 @@
 from enum import Enum
 
-class Role(Enum):
-    superadmin = 0
-    appManager = 1
-    admin = 2
-    teacher = 3
-    student = 4
+class Role:
+    Admin = "ORGANIZATION"
+    HOD = "HOD"
+    Teacher = "TEACHER"
+    Student = "STUDENT"
+    Parent = "PARENT"
 
 class CircularFor(Enum):
     everyone = 0
