@@ -137,7 +137,7 @@ class AdminHodCreate(APIView):
 					orgMaster = OrganizationMaster.objects.filter(orgUser__id=request.user.id).first()
 					hodMasterUser = HodMaster(org=orgMaster,hod=user,updatedBy=updatedBy)
 					user.save()
-					#hodMasterUser.save()
+					hodMasterUser.save()
 					print(hodMasterUser.org)
 				except Exception as e:
 					print(e)
@@ -148,15 +148,15 @@ class AdminHodCreate(APIView):
 				#print(hodMasterUser)
 				if hodMasterUser is not None:
 		
-					data = HodMasterSerializer(user)
-					print(data.data)
+					#data = HodSerializer(user)
+					#print(data.data)
 
 				# login(request, user)
 				# messages.success(request, "Registration successful." )
 					return JsonResponse({
 						"success": True,
 								"response": {
-									"data": data.data,
+									"data": "User created successfully",
 									"message" :"" ,   
 								},
 								"errors": []
