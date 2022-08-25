@@ -12,7 +12,11 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
+#from cv2 import LSD_REFINE_ADV
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,10 +91,39 @@ WSGI_APPLICATION = 'sih_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+#  DEVELOPMENT DB
+if os.getenv('ENV')=="DEV":
+    db = os.getenv('DB_HOST')
+    name = os.getenv('DB_NAME')
+    user = os.getenv('DB_USER')
+    password = os.getenv('DB_PASSWORD')
+    port = int(os.getenv('DB_PORT'))
+    
+
+#  PRODUCTION DB
+# if os.getenv('ENV') == "PROD":
+#     db = os.getenv('DB_DEV_HOST_PRIVATE')
+#     name = os.getenv('DB_PROD_NAME')
+#     user = os.getenv('DB_PROD_USER')
+#     password = os.getenv('DB_PROD_PASSWORD')
+#     port = int(os.getenv('DB_PROD_PORT'))
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': name,
+        'USER': user,
+        'PASSWORD': password,
+        'PORT': port,
+        'HOST':  db
+
+        # 'NAME': 'newonboarding',
+        # 'USER': 'pockethr_user',
+        # 'PASSWORD': '7!3@SwHF2p#ZRC$D',
+        # 'PORT': 3306,
+        # 'HOST': '10.10.10.12'
+
+
     }
 }
 
