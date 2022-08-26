@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from admin_portal.models import Hod, HodMaster, User
+from admin_portal.models import Hod, HodMaster, Teacher, User
 
 # class AdminRegisterForm(UserCreationForm):
 #     #email = forms.EmailField(label = "Email")
@@ -25,6 +25,20 @@ class HodRegisterForm(UserCreationForm):
 
 	def save(self, commit=True):
 		user = super(HodRegisterForm, self).save(commit=False)
+		user.email = self.cleaned_data['email']
+		if commit:
+			user.save()
+		return user
+
+class TeacherRegisterForm(UserCreationForm):
+	email = forms.EmailField(required=True)
+
+	class Meta:
+		model = Teacher
+		fields = ("username", "email", "mobile", "first_name","password1","password2")
+
+	def save(self, commit=True):
+		user = super(TeacherRegisterForm, self).save(commit=False)
 		user.email = self.cleaned_data['email']
 		if commit:
 			user.save()

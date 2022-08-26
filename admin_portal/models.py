@@ -21,6 +21,8 @@ from sih_app.enums import Role
 #
 #
 #
+
+
 class User(AbstractUser):
     objects = UserManager()
 
@@ -39,6 +41,60 @@ class User(AbstractUser):
 
     def get_absolute_url(self):
         return reverse("users:detail", kwargs={"username": self.username})
+
+class TeacherManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(type=User.Types.TEACHER)
+
+
+class Teacher(User):
+    #objects = TeacherManager()
+
+    def save(self, *args, **kwargs):
+        if not self.type:
+            self.type = User.Types.TEACHER
+        return super().save(*args, **kwargs)
+
+    def authenticate(username, password):
+        user = Teacher.objects.filter(username=username).first()
+        res = ""
+        if user is not None:
+            if (check_password(password, user.password)):
+                #data = HodSerializer(user)
+                try:
+                    token = Token.objects.get(user_id=user.id)
+
+                except Token.DoesNotExist:
+                    token = Token.objects.create(user=user)
+                res = {"success": True,
+                       "response": {
+                           "data": {"token": token.key},
+                           "message": "Login Successful",
+                       },
+                       "errors": []
+                       }
+            else:
+                res = {
+                    "success": False,
+                    "response": {
+                        "data": [],
+                        "message": "",
+                    },
+                    "errors": "Wrong password"
+                }
+        else:
+            res = {
+                "success": False,
+                "response": {
+                    "data": [],
+                    "message": "",
+                },
+                "errors": "User does not exist"
+            }
+        return res
+
+    class Meta:
+        proxy = True
 
 
 class Hod(User):
@@ -145,6 +201,137 @@ class Org(User):
     class Meta:
         proxy = True
 
+class OrganizationManager(models.Manager):
+    # def create_user(self, email, password, **extra_fields):
+    #     """
+    #     Create and save a User with the given email and password.
+    #     """
+    #     if not email:
+    #         raise ValueError(_('The Email must be set'))
+    #     email = self.normalize_email(email)
+    #     user = self.model(email=email, **extra_fields)
+    #     user.set_password(password)
+    #     user.save()
+    #     return user
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(type=User.Types.ORGANIZATION)
+
+class HodManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(type=User.Types.HOD)
+
+
+class StudentManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(type=User.Types.STUDENT)
+
+class ParentManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(type=User.Types.PARENT)
+
+###########################################
+
+
+
+
+
+class Student(User):
+    objects = StudentManager()
+
+    def save(self, *args, **kwargs):
+        if not self.type:
+            self.type = User.Types.STUDENT
+        return super().save(*args, **kwargs)
+
+    def authenticate(username, password):
+        user = Student.objects.filter(username=username).first()
+        res = ""
+        if user is not None:
+            if (check_password(password, user.password)):
+                #data = HodSerializer(user)
+                try:
+                    token = Token.objects.get(user_id=user.id)
+
+                except Token.DoesNotExist:
+                    token = Token.objects.create(user=user)
+                res = {"success": True,
+                       "response": {
+                           "data": {"token": token.key},
+                           "message": "Login Successful",
+                       },
+                       "errors": []
+                       }
+            else:
+                res = {
+                    "success": False,
+                    "response": {
+                        "data": [],
+                        "message": "",
+                    },
+                    "errors": "Wrong password"
+                }
+        else:
+            res = {
+                "success": False,
+                "response": {
+                    "data": [],
+                    "message": "",
+                },
+                "errors": "User does not exist"
+            }
+        return res
+
+    class Meta:
+        proxy = True
+
+class Parent(User):
+    objects = ParentManager()
+
+    def save(self, *args, **kwargs):
+        if not self.type:
+            self.type = User.Types.PARENT
+        return super().save(*args, **kwargs)
+
+    def authenticate(username, password):
+        user = Parent.objects.filter(username=username).first()
+        res = ""
+        if user is not None:
+            if (check_password(password, user.password)):
+                #data = HodSerializer(user)
+                try:
+                    token = Token.objects.get(user_id=user.id)
+                except Token.DoesNotExist:
+                    token = Token.objects.create(user=user)
+                res = {"success": True,
+                       "response": {
+                           "data": {"token": token.key},
+                           "message": "Login Successful",
+                       },
+                       "errors": []
+                       }
+            else:
+                res = {
+                    "success": False,
+                    "response": {
+                        "data": [],
+                        "message": "",
+                    },
+                    "errors": "Wrong password"
+                }
+        else:
+            res = {
+                "success": False,
+                "response": {
+                    "data": [],
+                    "message": "",
+                },
+                "errors": "User does not exist"
+            }
+        return res
+
+    class Meta:
+        proxy = True
+
 
 class OrganizationMaster(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -177,6 +364,7 @@ class TeachersMaster(models.Model):
     adminHod = models.ForeignKey(
         HodMaster, on_delete=models.CASCADE, blank=True)
     empNo = models.CharField(max_length=20,null=True,blank=True)
+    teacherUsr = models.ForeignKey(Teacher,on_delete=models.CASCADE, blank=True)
     dob = models.DateField()
     doj = models.DateField()
     image = models.CharField(max_length=255)
@@ -239,6 +427,8 @@ class StudentMaster(models.Model):
     classDetails = models.ForeignKey(
         StandardMaster, on_delete=models.CASCADE, blank=True)
     parents = models.ForeignKey(Parents, on_delete=models.CASCADE, blank=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=True, default="")
+    
     dob = models.DateField(null=True)
     admissionNo = models.CharField(max_length=255, unique=True)
     isActive = models.BooleanField(default=False)
@@ -373,186 +563,5 @@ class QRLibrary(models.Model):
 
 ###########################################
 
-class OrganizationManager(models.Manager):
-    # def create_user(self, email, password, **extra_fields):
-    #     """
-    #     Create and save a User with the given email and password.
-    #     """
-    #     if not email:
-    #         raise ValueError(_('The Email must be set'))
-    #     email = self.normalize_email(email)
-    #     user = self.model(email=email, **extra_fields)
-    #     user.set_password(password)
-    #     user.save()
-    #     return user
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(type=User.Types.ORGANIZATION)
-
-class HodManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(type=User.Types.HOD)
-
-class TeacherManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(type=User.Types.TEACHER)
-
-class StudentManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(type=User.Types.STUDENT)
-
-class ParentManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(type=User.Types.PARENT)
-
-###########################################
-
-
-
-
-class Teacher(User):
-    objects = TeacherManager()
-
-    def save(self, *args, **kwargs):
-        if not self.type:
-            self.type = User.Types.TEACHER
-        return super().save(*args, **kwargs)
-
-    def authenticate(username, password):
-        user = Teacher.objects.filter(username=username).first()
-        res = ""
-        if user is not None:
-            if (check_password(password, user.password)):
-                #data = HodSerializer(user)
-                try:
-                    token = Token.objects.get(user_id=user.id)
-
-                except Token.DoesNotExist:
-                    token = Token.objects.create(user=user)
-                res = {"success": True,
-                       "response": {
-                           "data": {"token": token.key},
-                           "message": "Login Successful",
-                       },
-                       "errors": []
-                       }
-            else:
-                res = {
-                    "success": False,
-                    "response": {
-                        "data": [],
-                        "message": "",
-                    },
-                    "errors": "Wrong password"
-                }
-        else:
-            res = {
-                "success": False,
-                "response": {
-                    "data": [],
-                    "message": "",
-                },
-                "errors": "User does not exist"
-            }
-        return res
-
-    class Meta:
-        proxy = True
-
-class Student(User):
-    objects = StudentManager()
-
-    def save(self, *args, **kwargs):
-        if not self.type:
-            self.type = User.Types.STUDENT
-        return super().save(*args, **kwargs)
-
-    def authenticate(username, password):
-        user = Student.objects.filter(username=username).first()
-        res = ""
-        if user is not None:
-            if (check_password(password, user.password)):
-                #data = HodSerializer(user)
-                try:
-                    token = Token.objects.get(user_id=user.id)
-
-                except Token.DoesNotExist:
-                    token = Token.objects.create(user=user)
-                res = {"success": True,
-                       "response": {
-                           "data": {"token": token.key},
-                           "message": "Login Successful",
-                       },
-                       "errors": []
-                       }
-            else:
-                res = {
-                    "success": False,
-                    "response": {
-                        "data": [],
-                        "message": "",
-                    },
-                    "errors": "Wrong password"
-                }
-        else:
-            res = {
-                "success": False,
-                "response": {
-                    "data": [],
-                    "message": "",
-                },
-                "errors": "User does not exist"
-            }
-        return res
-
-    class Meta:
-        proxy = True
-
-class Parent(User):
-    objects = ParentManager()
-
-    def save(self, *args, **kwargs):
-        if not self.type:
-            self.type = User.Types.PARENT
-        return super().save(*args, **kwargs)
-
-    def authenticate(username, password):
-        user = Parent.objects.filter(username=username).first()
-        res = ""
-        if user is not None:
-            if (check_password(password, user.password)):
-                #data = HodSerializer(user)
-                try:
-                    token = Token.objects.get(user_id=user.id)
-                except Token.DoesNotExist:
-                    token = Token.objects.create(user=user)
-                res = {"success": True,
-                       "response": {
-                           "data": {"token": token.key},
-                           "message": "Login Successful",
-                       },
-                       "errors": []
-                       }
-            else:
-                res = {
-                    "success": False,
-                    "response": {
-                        "data": [],
-                        "message": "",
-                    },
-                    "errors": "Wrong password"
-                }
-        else:
-            res = {
-                "success": False,
-                "response": {
-                    "data": [],
-                    "message": "",
-                },
-                "errors": "User does not exist"
-            }
-        return res
-
-    class Meta:
-        proxy = True
 
 

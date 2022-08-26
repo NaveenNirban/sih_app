@@ -108,22 +108,27 @@ if os.getenv('ENV')=="DEV":
 #     password = os.getenv('DB_PROD_PASSWORD')
 #     port = int(os.getenv('DB_PROD_PORT'))
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': name,
+#         'USER': user,
+#         'PASSWORD': password,
+#         'PORT': port,
+#         'HOST':  db
+
+#         # 'NAME': 'newonboarding',
+#         # 'USER': 'pockethr_user',
+#         # 'PASSWORD': '7!3@SwHF2p#ZRC$D',
+#         # 'PORT': 3306,
+#         # 'HOST': '10.10.10.12'
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': name,
-        'USER': user,
-        'PASSWORD': password,
-        'PORT': port,
-        'HOST':  db
-
-        # 'NAME': 'newonboarding',
-        # 'USER': 'pockethr_user',
-        # 'PASSWORD': '7!3@SwHF2p#ZRC$D',
-        # 'PORT': 3306,
-        # 'HOST': '10.10.10.12'
-
-
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -166,6 +171,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Default primary key field type

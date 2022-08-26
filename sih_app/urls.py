@@ -22,6 +22,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,TokenVerifyView
 )
 from admin_portal.serializers import MyTokenObtainPairView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,6 +35,12 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('api/hodAdd/',api.AdminHodCreate.as_view(), name="hodadd"),
+    path('api/teacherAdd/',api.HodTeacherCreate.as_view(), name="teacheradd"),
+    path('api/addStudyMaterial/',api.TeacherAddContent.as_view(), name="addStudyMaterial"),
+    path('api/getLearningMaterial/',api.StudentLearningMaterialClass.as_view(), name="getLearningMaterial"),
+    path('api/createPlaylist/',api.HodTeacherCreate.as_view(), name="createPlaylist"),
+    path('api/getClasses/',api.TeacherGetClasses.as_view(), name="getClasses"),
+    path('api/getLearning/',api.StudentGetLearning.as_view(), name="getLearning"),
     path('demo/',api.demoSerial, name="demo"),
 
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2,7 +2,7 @@ from dataclasses import field
 import django.contrib.auth.password_validation as validators
 from rest_framework import serializers
 from admin_portal.forms import HodRegisterForm
-from admin_portal.models import Hod, HodManager, HodMaster, Parent,Teacher, Student,Org, OrganizationMaster
+from admin_portal.models import Hod, HodManager, HodMaster, LearningMaterial, Parent, StandardMaster,Teacher, Student,Org, OrganizationMaster
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from sih_app.enums import Enum, Role
@@ -74,13 +74,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['type'] = user.type
             token['teacherName'] = user.first_name
             token['empId'] = str(user.id)
-            token['email'] = user.emal
+            token['email'] = user.email
             token['phone'] = user.mobile
         if user.type == Role.Student:
             token['type'] = user.type
             token['studentName'] = user.first_name
             token['schoolId'] = str(user.id)
-            token['admissionNo'] = user.emal
+            token['admissionNo'] = user.email
             token['phone'] = user.mobile
             token['kakshaId'] = str(user.id)
             token['fatherName'] = user.first_name
@@ -92,3 +92,21 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+class LearningMaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LearningMaterial
+        fields = ('id','url','name','fileType')
+
+class ClassesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StandardMaster
+        fields = ('name','id')
+        #fields = '__all__'
+        #depth = 1
+class LearningSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LearningMaterial
+        fields = ('id','url','name','fileType')
+        #fields = '__all__'
+        #depth = 1
