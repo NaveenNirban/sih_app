@@ -37,16 +37,16 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'admin_portal',
+    'mobileapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mobileapp',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [
@@ -67,7 +67,7 @@ REST_FRAMEWORK = {
 
 
 ROOT_URLCONF = 'sih_app.urls'
-AUTH_USER_MODEL = 'admin_portal.User'
+AUTH_USER_MODEL = 'mobileapp.User'
 
 TEMPLATES = [
     {

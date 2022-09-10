@@ -1,3 +1,6 @@
-/.env
-/.vscode
-/sihVenv
+.env/
+.vscode/
+sihVenv/
+.idea/
+mobileapp/__pycache__/
+sih_app/__pycache__/

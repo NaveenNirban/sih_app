@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from admin_portal.models import Hod, HodMaster, Teacher, User
-
+from mobileapp.models import Hod, HodMaster, StandardMaster, Student, StudentMaster, Teacher, User
+from django.forms import ModelForm
 # class AdminRegisterForm(UserCreationForm):
 #     #email = forms.EmailField(label = "Email")
 #     username = forms.CharField(label = "Username")
@@ -44,6 +44,52 @@ class TeacherRegisterForm(UserCreationForm):
 			user.save()
 		return user
 
+############################
+class StudentForm(UserCreationForm):
+	email = forms.EmailField(required=True)
+
+	class Meta:
+		model = Student
+		fields = ("username", "email", "mobile", "first_name","password1","password2")
+
+	def save(self, commit=True):
+		user = super(StudentForm, self).save(commit=False)
+		user.email = self.cleaned_data['email']
+		if commit:
+			user.save()
+		return user
+class StudentMasterForm(UserCreationForm):
+	email = forms.EmailField(required=True)
+
+	class Meta:
+		model = StudentMaster
+		fields = ("orgId", "hod", "faculty", "classDetails","parents","student","dob","admissionNo")
+
+	def save(self, commit=True):
+		user = super(StudentMasterForm, self).save(commit=False)
+		##user.email = self.cleaned_data['email']
+		if commit:
+			user.save()
+		return user
+
+############################
+
+class StandardCreationForm(ModelForm):
+	class Meta:
+		model = StandardMaster
+		fields = ("name",)
+	def save(self, commit=True):
+		user = super(StandardCreationForm, self).save(commit=False)
+		#user.email = self.cleaned_data['email']
+		if commit:
+			user.save()
+		return user
+		
+	def addData(self):
+		user = super(StandardCreationForm, self).save(commit=False)
+		user.updatedBy = self.updatedBy
+		return user
+
 class HodMasterRegisterForm(UserCreationForm):
 	email = forms.EmailField(required=True)
 
@@ -57,6 +103,7 @@ class HodMasterRegisterForm(UserCreationForm):
 		if commit:
 			user.save()
 		return user
+	
 
 class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
@@ -81,3 +128,4 @@ class UserCreationForm(forms.ModelForm):
         return user
 
 # Admin required data
+

@@ -1,8 +1,8 @@
 from dataclasses import field
 import django.contrib.auth.password_validation as validators
 from rest_framework import serializers
-from admin_portal.forms import HodRegisterForm
-from admin_portal.models import Hod, HodManager, HodMaster, LearningMaterial, Parent, StandardMaster,Teacher, Student,Org, OrganizationMaster
+from mobileapp.forms import HodRegisterForm
+from mobileapp.models import Hod, HodManager, HodMaster, LearningMaterial, Parent, StandardMaster,Teacher, Student,Org, OrganizationMaster
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from sih_app.enums import Enum, Role

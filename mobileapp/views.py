@@ -1,7 +1,7 @@
 import re
 from unicodedata import name
 from django.shortcuts import render
-from admin_portal.models import HodMaster, OrganizationMaster, StandardMaster, StudentMaster, Subjects, TeachersMaster
+from mobileapp.models import HodMaster, OrganizationMaster, StandardMaster, StudentMaster, Subjects, TeachersMaster
 from django.contrib.auth.hashers import check_password
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -9,9 +9,9 @@ import json
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from admin_portal.models import Hod, Org, Student, Parent, Teacher, User, LearningMaterial
-from admin_portal.forms import HodRegisterForm, TeacherRegisterForm
-from admin_portal.serializers import ClassesSerializer, HodSerializer, HodMasterSerializer, LearningMaterialSerializer, LearningSerializer, OrganizationMasterSerializer
+from mobileapp.models import Hod, Org, Student, Parent, Teacher, User, LearningMaterial
+from mobileapp.forms import HodRegisterForm, StandardCreationForm, StudentForm, StudentMasterForm, TeacherRegisterForm
+from mobileapp.serializers import ClassesSerializer, HodSerializer, HodMasterSerializer, LearningMaterialSerializer, LearningSerializer, OrganizationMasterSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -150,7 +150,7 @@ class TeacherLoginView(APIView):
 
 ################## Working functions starts ##########
 
-
+# Done
 class AdminHodCreate(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -162,31 +162,25 @@ class AdminHodCreate(APIView):
             form = HodRegisterForm(request.POST)
             if form.is_valid():
                 user = form.save(commit=False)
-
                 updatedBy = request.user.id
-                # print(type(user))
-
+                orgMaster=None
+                hodMasterUser=None
                 try:
                     orgMaster = OrganizationMaster.objects.filter(
                         orgUser__id=request.user.id).first()
+                    print(orgMaster)
+                    
                     hodMasterUser = HodMaster(
                         org=orgMaster, hod=user, updatedBy=updatedBy)
-                    user.save()
-                    hodMasterUser.save()
                     print(hodMasterUser.org)
+                    print(hodMasterUser)
                 except Exception as e:
                     print(e)
 
-                # userMaster.org = OrganizationMaster.objects.filter(orgUser__id=request.user.id).first()
+                if hodMasterUser is not None and orgMaster is not None:
 
-                # print(hodMasterUser)
-                if hodMasterUser is not None:
-
-                    # data = HodSerializer(user)
-                    # print(data.data)
-
-                    # login(request, user)
-                    # messages.success(request, "Registration successful." )
+                    user.save()
+                    hodMasterUser.save()
                     return JsonResponse({
                         "success": True,
                         "response": {
@@ -195,10 +189,18 @@ class AdminHodCreate(APIView):
                         },
                         "errors": []
                     }, safe=False)
+
                 else:
                     data = HodMasterSerializer(user)
-                # login(request, user)
-                # messages.success(request, "Registration successful." )
+                    if orgMaster is None:
+                        return JsonResponse({
+                        "success": True,
+                        "response": {
+                            "data": [],
+                            "message": "",
+                        },
+                        "errors": "No Organization master available"
+                    })
                     return JsonResponse({
                         "success": True,
                         "response": {
@@ -226,7 +228,7 @@ class AdminHodCreate(APIView):
                 "errors": "You are not authorised to create HOD"
             })
 
-
+# Done
 class HodTeacherCreate(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -239,20 +241,65 @@ class HodTeacherCreate(APIView):
             if form.is_valid():
                 user = form.save(commit=False)
                 updatedBy = request.user.id
-                res = Hod.objects.filter(id=updatedBy).first()
-                # updatedByUserName = request.user.
-                print(updatedBy)
-                hodMaster = HodMaster.objects.filter(hod__id=res.id)
-                print(len(hodMaster))
 
-                return JsonResponse({
-                    "success": False,
-                    "response": {
-                        "data": res.id,
-                        "message": "",
-                    },
-                    "errors": []
-                })
+                teacherMasterUser=None
+                hodMaster=None
+                try:
+
+                    hodMaster = HodMaster.objects.filter(
+                        hod__id=request.user.id).first()
+                    print(hodMaster)
+                    
+                    teacherMasterUser = TeachersMaster(
+                        adminHod=hodMaster, teacherUsr=user, updatedBy=updatedBy)
+
+                except Exception as e:
+
+                    print(e)
+                    return JsonResponse({
+                        "success": False,
+                        "response": {
+                            "data": str(e),
+                            "message": "",
+                        },
+                        "errors": []
+                    }, safe=False)
+
+
+                if teacherMasterUser is not None and hodMaster is not None:
+
+                    user.save()
+                    teacherMasterUser.save()
+                    return JsonResponse({
+                        "success": True,
+                        "response": {
+                            "data": "User created successfully",
+                            "message": "",
+                        },
+                        "errors": []
+                    }, safe=False)
+
+                else:
+                    #data = HodMasterSerializer(user)
+                    if hodMaster is None:
+                        return JsonResponse({
+                        "success": True,
+                        "response": {
+                            "data": [],
+                            "message": "",
+                        },
+                        "errors": "No Hod master available"
+                    })
+                    else:
+                        return JsonResponse({
+                            "success": True,
+                            "response": {
+                                "data": [],
+                                "message": "",
+                            },
+                            "errors": "Error in saving data to HodMaster"
+                        })
+
             return JsonResponse({
                 "success": False,
                 "response": {
@@ -271,7 +318,96 @@ class HodTeacherCreate(APIView):
                 "errors": "You are not authorised to create HOD"
             })
 
+# TeacherHodAdminAddStudent
+class TeacherStudentCreate(APIView):
+    permission_classes = (IsAuthenticated,)
 
+    def post(self, request, *args, **kwargs):
+        userType = request.user.type
+        if userType == Role.HOD or userType == Role.Admin or user == Role.Teacher:
+            # body_unicode = request.body.decode('utf-8')
+            # body = json.loads(body_unicode)
+            form = StudentForm(request.POST)
+            form2 = StudentMasterForm(request.POST)
+            if form.is_valid():
+                user = form.save(commit=False)
+                updatedBy = request.user.id
+                try:
+                    form2.faculty
+
+                    hodMaster = HodMaster.objects.filter(
+                        hod__id=request.user.id).first()
+                    print(hodMaster)
+                    
+                    teacherMasterUser = TeachersMaster(
+                        adminHod=hodMaster, teacherUsr=user, updatedBy=updatedBy)
+
+                except Exception as e:
+
+                    print(e)
+                    return JsonResponse({
+                        "success": False,
+                        "response": {
+                            "data": str(e),
+                            "message": "",
+                        },
+                        "errors": []
+                    }, safe=False)
+
+
+                if teacherMasterUser is not None and hodMaster is not None:
+
+                    user.save()
+                    teacherMasterUser.save()
+                    return JsonResponse({
+                        "success": True,
+                        "response": {
+                            "data": "User created successfully",
+                            "message": "",
+                        },
+                        "errors": []
+                    }, safe=False)
+
+                else:
+                    #data = HodMasterSerializer(user)
+                    if hodMaster is None:
+                        return JsonResponse({
+                        "success": True,
+                        "response": {
+                            "data": [],
+                            "message": "",
+                        },
+                        "errors": "No Hod master available"
+                    })
+                    else:
+                        return JsonResponse({
+                            "success": True,
+                            "response": {
+                                "data": [],
+                                "message": "",
+                            },
+                            "errors": "Error in saving data to HodMaster"
+                        })
+
+            return JsonResponse({
+                "success": False,
+                "response": {
+                    "data": [],
+                    "message": "",
+                },
+                "errors": form.errors
+            })
+        else:
+            return JsonResponse({
+                "success": False,
+                "response": {
+                    "data": [],
+                    "message": "",
+                },
+                "errors": "You are not authorised to create HOD"
+            })
+
+# Add Classes
 class TeacherAddContent(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -313,6 +449,8 @@ class TeacherAddContent(APIView):
             })
 
 
+
+
 class StudentLearningMaterialClass(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -327,7 +465,6 @@ class StudentLearningMaterialClass(APIView):
                 },
                 "errors": []
             })
-
 
 class TeacherGetClasses(APIView):
     permission_classes = (IsAuthenticated,)
@@ -361,6 +498,42 @@ class StudentGetLearning(APIView):
                 "success": True,
                 "response": {
                     "data": data,
+                    "message": "",
+                },
+                "errors": []
+            })
+
+class Standard(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, *args, **kwargs):
+        userType = request.user.id
+        data = StandardMaster()
+        data.updatedBy=userType
+        #if userType == Role.Admin:
+            # body_unicode = request.body.decode('utf-8')
+            # body = json.loads(body_unicode)
+        request.POST['updatedBy']="OIUYTRE"
+        form = StandardCreationForm(request.POST)
+        
+        if form.is_valid():
+            # user = form.save(commit=False)
+            #print(form.data)
+            #form.data['qwerty']="uytr"
+            print(form.data)
+            updatedBy = request.user.id
+            return JsonResponse({
+            "success": True,
+            "response": {
+                "data": "sab sahi",
+                "message": "",
+            },
+            "errors": []
+        })
+        else:
+            return JsonResponse({
+                "success": False,
+                "response": {
+                    "data": [form.errors],
                     "message": "",
                 },
                 "errors": []
